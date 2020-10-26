@@ -3,26 +3,258 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 51;
 	objects = {
+
+/* Begin PBXBuildFile section */
+		1C4B66642532B10F0081F06C /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C4B66632532B10F0081F06C /* main.cpp */; };
+		1CE88E4C25344E74005CC41B /* libglfw.3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1CE88E4425344647005CC41B /* libglfw.3.dylib */; };
+		1CE88E59253473AC005CC41B /* glad.c in Sources */ = {isa = PBXBuildFile; fileRef = 1CE88E58253473AC005CC41B /* glad.c */; };
+		1CE88E6C2535D567005CC41B /* render.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CE88E632535D566005CC41B /* render.cpp */; };
+		1CE88E6D2535D567005CC41B /* Geomotry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CE88E652535D566005CC41B /* Geomotry.cpp */; };
+		1CE88E6E2535D567005CC41B /* Model.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CE88E682535D566005CC41B /* Model.cpp */; };
+		1CE88E6F2535D567005CC41B /* tgaimage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CE88E692535D567005CC41B /* tgaimage.cpp */; };
+		1CE88EA7253827B4005CC41B /* stb_image.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CE88EA5253827B4005CC41B /* stb_image.cpp */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		1C4B665E2532B10F0081F06C /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		1C4B66602532B10F0081F06C /* dodos */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = dodos; sourceTree = BUILT_PRODUCTS_DIR; };
+		1C4B66632532B10F0081F06C /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		1CE88E362534449E005CC41B /* libglfw.3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libglfw.3.dylib; path = "../../tempRes/未命名文件夹 3/glfw-3.3.2.bin.MACOS/lib-macos/libglfw.3.dylib"; sourceTree = "<group>"; };
+		1CE88E4025344647005CC41B /* glfw3.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = glfw3.h; sourceTree = "<group>"; };
+		1CE88E4125344647005CC41B /* glfw3native.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = glfw3native.h; sourceTree = "<group>"; };
+		1CE88E4325344647005CC41B /* libglfw3.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libglfw3.a; sourceTree = "<group>"; };
+		1CE88E4425344647005CC41B /* libglfw.3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libglfw.3.dylib; sourceTree = "<group>"; };
+		1CE88E542534739F005CC41B /* glad.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = glad.h; sourceTree = "<group>"; };
+		1CE88E562534739F005CC41B /* khrplatform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = khrplatform.h; sourceTree = "<group>"; };
+		1CE88E58253473AC005CC41B /* glad.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = glad.c; sourceTree = "<group>"; };
+		1CE88E5E2535D4AF005CC41B /* diablo3_pose.obj */ = {isa = PBXFileReference; lastKnownFileType = text; path = diablo3_pose.obj; sourceTree = "<group>"; };
+		1CE88E632535D566005CC41B /* render.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = render.cpp; sourceTree = "<group>"; };
+		1CE88E642535D566005CC41B /* GlobalFunctions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GlobalFunctions.h; sourceTree = "<group>"; };
+		1CE88E652535D566005CC41B /* Geomotry.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Geomotry.cpp; sourceTree = "<group>"; };
+		1CE88E662535D566005CC41B /* Geomotry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Geomotry.h; sourceTree = "<group>"; };
+		1CE88E672535D566005CC41B /* Model.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Model.h; path = ../../../../OpenSource/imgRender/origin/Model.h; sourceTree = "<group>"; };
+		1CE88E682535D566005CC41B /* Model.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Model.cpp; path = ../../../../OpenSource/imgRender/origin/Model.cpp; sourceTree = "<group>"; };
+		1CE88E692535D567005CC41B /* tgaimage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tgaimage.cpp; sourceTree = "<group>"; };
+		1CE88E6A2535D567005CC41B /* tgaimage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tgaimage.h; sourceTree = "<group>"; };
+		1CE88E6B2535D567005CC41B /* render.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = render.h; sourceTree = "<group>"; };
+		1CE88E9C25381D76005CC41B /* shader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = shader.hpp; sourceTree = "<group>"; };
+		1CE88EA125381EAF005CC41B /* test.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = test.frag; sourceTree = "<group>"; };
+		1CE88EA225381EAF005CC41B /* test.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = test.vert; sourceTree = "<group>"; };
+		1CE88EA425382793005CC41B /* stb_image.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = stb_image.h; sourceTree = "<group>"; };
+		1CE88EA5253827B4005CC41B /* stb_image.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = stb_image.cpp; sourceTree = "<group>"; };
+		1CE88EA825382A87005CC41B /* grid.tga */ = {isa = PBXFileReference; lastKnownFileType = file; path = grid.tga; sourceTree = "<group>"; };
+		1CE88EA925383DB0005CC41B /* diablo3_pose_diffuse.tga */ = {isa = PBXFileReference; lastKnownFileType = file; path = diablo3_pose_diffuse.tga; sourceTree = "<group>"; };
+		1CE88EB3253851E1005CC41B /* sakura.obj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = sakura.obj; sourceTree = "<group>"; };
+		1CE88EB425385357005CC41B /* meinumo.obj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = meinumo.obj; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		1C4B665D2532B10F0081F06C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1CE88E4C25344E74005CC41B /* libglfw.3.dylib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		1C4B66552532B0710081F06C = {
 			isa = PBXGroup;
 			children = (
+				1C4B66622532B10F0081F06C /* dodos */,
+				1C4B66612532B10F0081F06C /* Products */,
+				1CE88E352534449E005CC41B /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
+		1C4B66612532B10F0081F06C /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				1C4B66602532B10F0081F06C /* dodos */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1C4B66622532B10F0081F06C /* dodos */ = {
+			isa = PBXGroup;
+			children = (
+				1CE88EA325382775005CC41B /* stbImg */,
+				1CE88EA025381EAF005CC41B /* shader */,
+				1CE88E5D2535D49E005CC41B /* Resource */,
+				1CE88E622535D556005CC41B /* imgRender */,
+				1CE88E3E25344647005CC41B /* include */,
+				1CE88E4225344647005CC41B /* lib-macos */,
+				1C4B66632532B10F0081F06C /* main.cpp */,
+			);
+			path = dodos;
+			sourceTree = "<group>";
+		};
+		1CE88E352534449E005CC41B /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				1CE88E362534449E005CC41B /* libglfw.3.dylib */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		1CE88E3E25344647005CC41B /* include */ = {
+			isa = PBXGroup;
+			children = (
+				1CE88E9A2537F651005CC41B /* shader */,
+				1CE88E57253473AC005CC41B /* src */,
+				1CE88E532534739F005CC41B /* glad */,
+				1CE88E552534739F005CC41B /* KHR */,
+				1CE88E3F25344647005CC41B /* GLFW */,
+			);
+			path = include;
+			sourceTree = "<group>";
+		};
+		1CE88E3F25344647005CC41B /* GLFW */ = {
+			isa = PBXGroup;
+			children = (
+				1CE88E4025344647005CC41B /* glfw3.h */,
+				1CE88E4125344647005CC41B /* glfw3native.h */,
+			);
+			path = GLFW;
+			sourceTree = "<group>";
+		};
+		1CE88E4225344647005CC41B /* lib-macos */ = {
+			isa = PBXGroup;
+			children = (
+				1CE88E4325344647005CC41B /* libglfw3.a */,
+				1CE88E4425344647005CC41B /* libglfw.3.dylib */,
+			);
+			path = "lib-macos";
+			sourceTree = "<group>";
+		};
+		1CE88E532534739F005CC41B /* glad */ = {
+			isa = PBXGroup;
+			children = (
+				1CE88E542534739F005CC41B /* glad.h */,
+			);
+			path = glad;
+			sourceTree = "<group>";
+		};
+		1CE88E552534739F005CC41B /* KHR */ = {
+			isa = PBXGroup;
+			children = (
+				1CE88E562534739F005CC41B /* khrplatform.h */,
+			);
+			path = KHR;
+			sourceTree = "<group>";
+		};
+		1CE88E57253473AC005CC41B /* src */ = {
+			isa = PBXGroup;
+			children = (
+				1CE88E58253473AC005CC41B /* glad.c */,
+			);
+			path = src;
+			sourceTree = "<group>";
+		};
+		1CE88E5D2535D49E005CC41B /* Resource */ = {
+			isa = PBXGroup;
+			children = (
+				1CE88EB425385357005CC41B /* meinumo.obj */,
+				1CE88EB3253851E1005CC41B /* sakura.obj */,
+				1CE88EA925383DB0005CC41B /* diablo3_pose_diffuse.tga */,
+				1CE88EA825382A87005CC41B /* grid.tga */,
+				1CE88E5E2535D4AF005CC41B /* diablo3_pose.obj */,
+			);
+			path = Resource;
+			sourceTree = "<group>";
+		};
+		1CE88E622535D556005CC41B /* imgRender */ = {
+			isa = PBXGroup;
+			children = (
+				1CE88E652535D566005CC41B /* Geomotry.cpp */,
+				1CE88E662535D566005CC41B /* Geomotry.h */,
+				1CE88E642535D566005CC41B /* GlobalFunctions.h */,
+				1CE88E682535D566005CC41B /* Model.cpp */,
+				1CE88E672535D566005CC41B /* Model.h */,
+				1CE88E632535D566005CC41B /* render.cpp */,
+				1CE88E6B2535D567005CC41B /* render.h */,
+				1CE88E692535D567005CC41B /* tgaimage.cpp */,
+				1CE88E6A2535D567005CC41B /* tgaimage.h */,
+			);
+			path = imgRender;
+			sourceTree = "<group>";
+		};
+		1CE88E9A2537F651005CC41B /* shader */ = {
+			isa = PBXGroup;
+			children = (
+				1CE88E9C25381D76005CC41B /* shader.hpp */,
+			);
+			path = shader;
+			sourceTree = "<group>";
+		};
+		1CE88EA025381EAF005CC41B /* shader */ = {
+			isa = PBXGroup;
+			children = (
+				1CE88EA125381EAF005CC41B /* test.frag */,
+				1CE88EA225381EAF005CC41B /* test.vert */,
+			);
+			path = shader;
+			sourceTree = "<group>";
+		};
+		1CE88EA325382775005CC41B /* stbImg */ = {
+			isa = PBXGroup;
+			children = (
+				1CE88EA425382793005CC41B /* stb_image.h */,
+				1CE88EA5253827B4005CC41B /* stb_image.cpp */,
+			);
+			path = stbImg;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		1C4B665F2532B10F0081F06C /* dodos */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1C4B66652532B10F0081F06C /* Build configuration list for PBXNativeTarget "dodos" */;
+			buildPhases = (
+				1C4B665C2532B10F0081F06C /* Sources */,
+				1C4B665D2532B10F0081F06C /* Frameworks */,
+				1C4B665E2532B10F0081F06C /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = dodos;
+			productName = dodos;
+			productReference = 1C4B66602532B10F0081F06C /* dodos */;
+			productType = "com.apple.product-type.tool";
+		};
+/* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
 		1C4B66562532B0710081F06C /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				LastUpgradeCheck = 1120;
+				TargetAttributes = {
+					1C4B665F2532B10F0081F06C = {
+						CreatedOnToolsVersion = 11.2.1;
+					};
+				};
 			};
 			buildConfigurationList = 1C4B66592532B0710081F06C /* Build configuration list for PBXProject "dodos" */;
-			compatibilityVersion = "Xcode 9.3";
+			compatibilityVersion = "Xcode 10.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -30,12 +262,31 @@
 				Base,
 			);
 			mainGroup = 1C4B66552532B0710081F06C;
+			productRefGroup = 1C4B66612532B10F0081F06C /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
+				1C4B665F2532B10F0081F06C /* dodos */,
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		1C4B665C2532B10F0081F06C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1C4B66642532B10F0081F06C /* main.cpp in Sources */,
+				1CE88E59253473AC005CC41B /* glad.c in Sources */,
+				1CE88EA7253827B4005CC41B /* stb_image.cpp in Sources */,
+				1CE88E6F2535D567005CC41B /* tgaimage.cpp in Sources */,
+				1CE88E6E2535D567005CC41B /* Model.cpp in Sources */,
+				1CE88E6C2535D567005CC41B /* render.cpp in Sources */,
+				1CE88E6D2535D567005CC41B /* Geomotry.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
 		1C4B665A2532B0710081F06C /* Debug */ = {
@@ -50,6 +301,139 @@
 			};
 			name = Release;
 		};
+		1C4B66662532B10F0081F06C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				FRAMEWORK_SEARCH_PATHS = "/Users/matengli/Desktop/matengli/gameMaker/dodos/dodos/lib-macos/**";
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					/Users/matengli/Desktop/matengli/gameMaker/dodos/dodos/include,
+					/usr/local/Cellar/glm/0.9.9.5/include,
+				);
+				LD_RUNPATH_SEARCH_PATHS = "/Users/matengli/Desktop/matengli/gameMaker/dodos/dodos/lib-macos";
+				LIBRARY_SEARCH_PATHS = (
+					"/Users/matengli/Desktop/matengli/gameMaker/dodos/dodos/lib-macos/**",
+					"$(PROJECT_DIR)/dodos/lib-macos",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		1C4B66672532B10F0081F06C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				FRAMEWORK_SEARCH_PATHS = "/Users/matengli/Desktop/matengli/gameMaker/dodos/dodos/lib-macos/**";
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					/Users/matengli/Desktop/matengli/gameMaker/dodos/dodos/include,
+					/usr/local/Cellar/glm/0.9.9.5/include,
+				);
+				LD_RUNPATH_SEARCH_PATHS = "/Users/matengli/Desktop/matengli/gameMaker/dodos/dodos/lib-macos";
+				LIBRARY_SEARCH_PATHS = (
+					"/Users/matengli/Desktop/matengli/gameMaker/dodos/dodos/lib-macos/**",
+					"$(PROJECT_DIR)/dodos/lib-macos",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -58,6 +442,15 @@
 			buildConfigurations = (
 				1C4B665A2532B0710081F06C /* Debug */,
 				1C4B665B2532B0710081F06C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		1C4B66652532B10F0081F06C /* Build configuration list for PBXNativeTarget "dodos" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1C4B66662532B10F0081F06C /* Debug */,
+				1C4B66672532B10F0081F06C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
