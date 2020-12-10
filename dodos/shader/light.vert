@@ -6,7 +6,7 @@ out vec3 vertexColor;
 out vec2 TexCoord;
 out vec3 Normal;
 out float light;
-out vec3 FragPos;
+out vec3 worldPos;
 
 uniform mat4 transform;
 
@@ -17,8 +17,4 @@ uniform mat4 projection;
 void main()
 {
     gl_Position = transform*projection * view * model * vec4(aPos, 1.0);
-    vertexColor = vec3(0.0);
-    FragPos = ( model * vec4(aPos, 1.0)).xyz;
-    TexCoord = aTexCoord;
-    Normal = mat3(transpose(inverse(model))) * normal;
 }

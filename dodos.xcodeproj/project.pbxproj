@@ -32,6 +32,9 @@
 /* Begin PBXFileReference section */
 		1C4B66602532B10F0081F06C /* dodos */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = dodos; sourceTree = BUILT_PRODUCTS_DIR; };
 		1C4B66632532B10F0081F06C /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		1CA21E45257E50390054250D /* qiyana.jpeg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = qiyana.jpeg; sourceTree = "<group>"; };
+		1CA21E46257F27030054250D /* light.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = light.frag; sourceTree = "<group>"; };
+		1CA21E47257F27030054250D /* light.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = light.vert; sourceTree = "<group>"; };
 		1CE88E362534449E005CC41B /* libglfw.3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libglfw.3.dylib; path = "../../tempRes/未命名文件夹 3/glfw-3.3.2.bin.MACOS/lib-macos/libglfw.3.dylib"; sourceTree = "<group>"; };
 		1CE88E4025344647005CC41B /* glfw3.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = glfw3.h; sourceTree = "<group>"; };
 		1CE88E4125344647005CC41B /* glfw3native.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = glfw3native.h; sourceTree = "<group>"; };
@@ -169,6 +172,7 @@
 		1CE88E5D2535D49E005CC41B /* Resource */ = {
 			isa = PBXGroup;
 			children = (
+				1CA21E45257E50390054250D /* qiyana.jpeg */,
 				1CE88EB425385357005CC41B /* meinumo.obj */,
 				1CE88EB3253851E1005CC41B /* sakura.obj */,
 				1CE88EA925383DB0005CC41B /* diablo3_pose_diffuse.tga */,
@@ -205,6 +209,8 @@
 		1CE88EA025381EAF005CC41B /* shader */ = {
 			isa = PBXGroup;
 			children = (
+				1CA21E46257F27030054250D /* light.frag */,
+				1CA21E47257F27030054250D /* light.vert */,
 				1CE88EA125381EAF005CC41B /* test.frag */,
 				1CE88EA225381EAF005CC41B /* test.vert */,
 			);

@@ -39,7 +39,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
     glViewport(0, 0, width, height);
 }
 
-void processInput(GLFWwindow *window,float* x,float* y,float* scale)
+void processInput(GLFWwindow *window)
 {
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
@@ -56,24 +56,6 @@ void processInput(GLFWwindow *window,float* x,float* y,float* scale)
         cameraPos += cameraSpeed * cameraUp;
     if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
         cameraPos -= cameraSpeed * cameraUp;
-//    if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-//        *x = *x-0.1;
-//    if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-//        *x = *x+0.1;
-//    if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-//    {
-//        *y = *y-0.01;
-//        std::cout << "y:"<<*y << std::endl;
-//    }
-//    if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-//    {
-//        *y = *y+0.01;
-//        std::cout << "y:"<<*y << std::endl;
-//    }
-//    if(glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
-//        *scale = *scale+0.001;
-//    if(glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
-//        *scale = *scale-0.001;
 }
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
@@ -110,6 +92,82 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
     cameraFront = glm::normalize(front);
 }
 
+unsigned int* getImage(std::string imgName){
+    unsigned int texture1;
+    glGenTextures(1, &texture1);
+    glBindTexture(GL_TEXTURE_2D, texture1);
+
+    // S轴wrap模式
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+    // T轴wrap模式
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+    // 设置纹理过滤
+    // 一个常见的错误是，将放大过滤的选项设置为多级渐远纹理过滤选项之一。
+    // 这样没有任何效果，因为多级渐远纹理主要是使用在纹理被缩小的情况下的：
+    // 纹理放大不会使用多级渐远纹理，为放大过滤设置多级渐远纹理的选项会产生一个GL_INVALID_ENUM错误代码。
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    
+    int width, height, nrChannels;
+    stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
+//    "Resource/diablo3_pose_diffuse.tga"
+    unsigned short *data = stbi_load_16(imgName.c_str(), &width, &height, &nrChannels, 0);
+    if(data){
+        // 纹理目标，mipmap级别，存储格式，宽度，高度，0（历史问题）,图像数据
+        glad_glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,width,height,0,GL_RGB,GL_UNSIGNED_SHORT,data);
+        // 自动创建mipmaps
+        glad_glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    // 释放对应内存
+    stbi_image_free(data);
+    
+    return &texture1;
+}
+
+void setTransform(Shader* shader,glm::vec3 position,glm::vec3 scale){
+    float time = glfwGetTime();
+//        int loc = glad_glGetUniformLocation(shaderProgram,"ourColorFactor");
+//
+//     需要注意的是：查询uniform地址不要求你之前使用过着色器程序，
+//     但是更新一个uniform之前你必须先使用程序（调用glUseProgram)，
+//     因为它是在当前激活的着色器程序中设置uniform的。
+//     说是这么说。。。。。。我直接使用也是ok的
+//        glad_glUniform1f(loc,light);
+//        glad_glUseProgram(shaderProgram);
+    // create transformations
+    glm::mat4 model         = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
+    glm::mat4 view          = glm::mat4(1.0f);
+    glm::mat4 projection    = glm::mat4(1.0f);
+
+    model = glm::translate(model, position);
+    model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    model = glm::scale(model, scale);
+    
+    view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+    projection = glm::perspective(glm::radians(fov), (float)screenWidth / (float)screenHeight, 0.1f, 100.0f);
+    
+    glm::mat4 transform = glm::mat4(1.0f);
+
+    unsigned int transformLoc = glGetUniformLocation(shader->ID, "model");
+    glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(model));
+    
+    transformLoc = glGetUniformLocation(shader->ID, "view");
+    glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(view));
+    
+    transformLoc = glGetUniformLocation(shader->ID, "projection");
+    glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(projection));
+    
+    transformLoc = glGetUniformLocation(shader->ID, "transform");
+    glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
+    
+    shader->use();
+}
+
+void setTransform(Shader* shader,glm::vec3 position){
+    setTransform(shader,position,glm::vec3(1.0f,1.0f,1.0f));
+}
+
+
 int main(int argc, const char * argv[]) {
     
     // 初始化，
@@ -137,175 +195,135 @@ int main(int argc, const char * argv[]) {
         std::cout << "Failed to initialize GLAD" << std::endl;
         return -1;
     }
+    Shader* shader = new Shader("shader/test.vert","shader/test.frag");
+//    shader->use();
     
-    unsigned int EBO;
-    glGenBuffers(1, &EBO);
+    Shader* lightshader = new Shader("shader/light.vert","shader/light.frag");
+//    lightshader->use();
     
-    //  VBO
-    unsigned int VBO;
-    glGenBuffers(1, &VBO);
+    float vertices[] = {
+        -0.5f, -0.5f, -0.5f,
+         0.5f, -0.5f, -0.5f,
+         0.5f,  0.5f, -0.5f,
+         0.5f,  0.5f, -0.5f,
+        -0.5f,  0.5f, -0.5f,
+        -0.5f, -0.5f, -0.5f,
+
+        -0.5f, -0.5f,  0.5f,
+         0.5f, -0.5f,  0.5f,
+         0.5f,  0.5f,  0.5f,
+         0.5f,  0.5f,  0.5f,
+        -0.5f,  0.5f,  0.5f,
+        -0.5f, -0.5f,  0.5f,
+
+        -0.5f,  0.5f,  0.5f,
+        -0.5f,  0.5f, -0.5f,
+        -0.5f, -0.5f, -0.5f,
+        -0.5f, -0.5f, -0.5f,
+        -0.5f, -0.5f,  0.5f,
+        -0.5f,  0.5f,  0.5f,
+
+         0.5f,  0.5f,  0.5f,
+         0.5f,  0.5f, -0.5f,
+         0.5f, -0.5f, -0.5f,
+         0.5f, -0.5f, -0.5f,
+         0.5f, -0.5f,  0.5f,
+         0.5f,  0.5f,  0.5f,
+
+        -0.5f, -0.5f, -0.5f,
+         0.5f, -0.5f, -0.5f,
+         0.5f, -0.5f,  0.5f,
+         0.5f, -0.5f,  0.5f,
+        -0.5f, -0.5f,  0.5f,
+        -0.5f, -0.5f, -0.5f,
+
+        -0.5f,  0.5f, -0.5f,
+         0.5f,  0.5f, -0.5f,
+         0.5f,  0.5f,  0.5f,
+         0.5f,  0.5f,  0.5f,
+        -0.5f,  0.5f,  0.5f,
+        -0.5f,  0.5f, -0.5f,
+    };
     
-    // VAO
-    unsigned int VAO;
+    float vertices2[] = {
+        // positions          // normals           // texture coords
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
+         0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
+
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
+
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+
+         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+         0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
+
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
+    };
+    
+    unsigned int indices[] = {  // note that we start from 0!
+        0, 1, 3,  // first Triangle
+        1, 2, 3,   // second Triangle
+    };
+    unsigned int VBO, VAO, EBO;
     glGenVertexArrays(1, &VAO);
-
-    // Texture
-    unsigned int texture1;
-    unsigned int texture2;
-    // 生成数量，对应地址
-    glGenTextures(1, &texture1);
-    glBindTexture(GL_TEXTURE_2D, texture1);
-    
-    // S轴wrap模式
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-    // T轴wrap模式
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-    // 设置纹理过滤
-    // 一个常见的错误是，将放大过滤的选项设置为多级渐远纹理过滤选项之一。
-    // 这样没有任何效果，因为多级渐远纹理主要是使用在纹理被缩小的情况下的：
-    // 纹理放大不会使用多级渐远纹理，为放大过滤设置多级渐远纹理的选项会产生一个GL_INVALID_ENUM错误代码。
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    
-    //  读取图片
-    int width, height, nrChannels;
-    stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
-    unsigned char *data = stbi_load("Resource/diablo3_pose_diffuse.tga", &width, &height, &nrChannels, 0);
-    if(data){
-        // 纹理目标，mipmap级别，存储格式，宽度，高度，0（历史问题）,图像数据
-        glad_glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,width,height,0,GL_RGB,GL_UNSIGNED_BYTE,data);
-        // 自动创建mipmaps
-        glad_glGenerateMipmap(GL_TEXTURE_2D);
-    }
-    // 释放对应内存
-    stbi_image_free(data);
-    
-    // 生成数量，对应地址
-    glGenTextures(1, &texture2);
-    glBindTexture(GL_TEXTURE_2D, texture2);
-    
-    // S轴wrap模式
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-    // T轴wrap模式
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-    // 设置纹理过滤
-    // 一个常见的错误是，将放大过滤的选项设置为多级渐远纹理过滤选项之一。
-    // 这样没有任何效果，因为多级渐远纹理主要是使用在纹理被缩小的情况下的：
-    // 纹理放大不会使用多级渐远纹理，为放大过滤设置多级渐远纹理的选项会产生一个GL_INVALID_ENUM错误代码。
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    
-    //  读取图片
-    stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
-    data = stbi_load("Resource/diablo3_pose_diffuse.tga", &width, &height, &nrChannels, 0);
-    if(data){
-        // 纹理目标，mipmap级别，存储格式，宽度，高度，0（历史问题）,图像数据
-        glad_glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,width,height,0,GL_RGB,GL_UNSIGNED_BYTE,data);
-        // 自动创建mipmaps
-        glad_glGenerateMipmap(GL_TEXTURE_2D);
-    }
-    // 释放对应内存
-    stbi_image_free(data);
-
-    // 1. 绑定VAO
+    glGenBuffers(1, &VBO);
     glBindVertexArray(VAO);
-    
-    Model * model = new Model();
-    model->readFromFile("Resource/diablo3_pose.obj");
 
-    float vertices[model->verts.size()*8];
-
-    for(int i=0; i < model->verts.size(); i++) {
-        vertices[i*8+0] = model->verts[i].x;
-        vertices[i*8+1] = model->verts[i].y;
-        vertices[i*8+2] = model->verts[i].z;
-
-        vertices[i*8+3] = 1.0f;
-        vertices[i*8+4] = 1.0f;
-        vertices[i*8+5] = 1.0f;
-    }
-////
-    unsigned int indices[model->getFacesCount()*3];
-    for(int i=0; i < model->getFacesCount(); i++) {
-        indices[i*3+0] = model->faces[i][0];
-        indices[i*3+1] = model->faces[i][1];
-        indices[i*3+2] = model->faces[i][2];
-    }
-
-    for(int i=0; i < model->getFacesCount(); i++) {
-        int vid[] = {model->faces[i][0],model->faces[i][1],model->faces[i][2]};
-        
-        vec4f v1 = model->verts[vid[0]]-model->verts[vid[1]];
-        vec4f v2 = model->verts[vid[2]]-model->verts[vid[1]];
-        
-        vec4f f = (v2^v1).getNor();
-
-        for(int j=0; j < 3; j++) {
-            int id = i*3+j;
-            int tid = model->faces[i][j];
-            vec4f uvId = model->getUvVecs(i,j);
-            
-            vertices[tid*8+6] = uvId.x;
-            vertices[tid*8+7] = uvId.y;
-            
-            vertices[vid[j]*8+3] = f.x;
-            vertices[vid[j]*8+4] = f.y;
-            vertices[vid[j]*8+5] = f.z;
-        }
-    }
-    
-    int counts = model->getFacesCount();
-    
-//    float vertices[] = {
-//    //     ---- 位置 ----       ---- 颜色 ----     - 纹理坐标 -
-//         0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // 右上
-//         0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // 右下
-//        -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // 左下
-//        -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // 左上
-//    };
-//
-//    unsigned int indices[] = {
-//        0, 1, 3, // first triangle
-//        1, 2, 3  // second triangle
-//    };
-    
-    // 2. 把VBO,EBO复制到缓冲中供OpenGL使用
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_DYNAMIC_DRAW);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    unsigned int* texture = getImage("Resource/qiyana.jpeg");
     
-    // 3. 设置顶点属性指针
-    //（layout的取值,对应属性的大小(几个数),数据类型,是否标准化,步长，偏移量)
+    unsigned int VAO2,VBO2;
+    glGenVertexArrays(1, &VAO2);
+    glGenBuffers(1, &VBO2);
+    glBindVertexArray(VAO2);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO2);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices2), vertices2, GL_STATIC_DRAW);
+    
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-    
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3*sizeof(float)));
     glEnableVertexAttribArray(1);
-    
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6*sizeof(float)));
     glEnableVertexAttribArray(2);
-    
-    
-    // 绑定贴图
-    glBindTexture(GL_TEXTURE_2D, texture1);
-    glBindVertexArray(VAO);
-    
-    Shader* shader = new Shader("shader/test.vert","shader/test.frag");
-    shader->use();
-    
-    shader->setInt("texture1", 0); // 设置贴图
-    shader->setInt("texture2", 1); // 设置贴图
-    
-    float x = 0.0f;
-    float y = 0.0f;
-    float scale = 1.0f;
-    
-    glEnable(GL_DEPTH_TEST);
+    glBindTexture(GL_TEXTURE_2D, *texture);
     
     glm::vec3 cubePositions[] = {
       glm::vec3( 0.0f,  0.0f,  0.0f),
-      glm::vec3( 2.0f,  5.0f, -15.0f),
+      glm::vec3( 1.5f,  1.5f, -1.5f),
       glm::vec3(-1.5f, -2.2f, -2.5f),
       glm::vec3(-3.8f, -2.0f, -12.3f),
       glm::vec3( 2.4f, -0.4f, -3.5f),
@@ -315,91 +333,78 @@ int main(int argc, const char * argv[]) {
       glm::vec3( 1.5f,  0.2f, -1.5f),
       glm::vec3(-1.3f,  1.0f, -1.5f)
     };
+    
+    glm::vec3 lightPos = glm::vec3( 0.0f,  0.4f, 1.5f);
+    glm::vec3 lightColor = glm::vec3( 1.0f,  1.0f, 1.0f);
+
+    glEnable(GL_DEPTH_TEST);
 
     while(!glfwWindowShouldClose(window))
     {
+        float time = glfwGetTime();
+        lightPos = glm::vec3( 5.0f*sin(time),  0.1f, -5.0f*cos(time));
 //        input
-        processInput(window,&x,&y,&scale);
+        processInput(window);
+        
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         
         glfwSetCursorPosCallback(window, mouse_callback);
         
-        
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
-        glBindVertexArray(VAO);
         for(unsigned int i = 0; i < 10; i++)
         {
-
-          glDrawArrays(GL_TRIANGLES, 0, 36);
-        
+            glBindVertexArray(VAO2);
+            shader->use();
+            shader->setInt("texture1", 0); // 设置贴图
             // 多个纹理需要激活纹理单元
             glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, texture1);
-            glActiveTexture(GL_TEXTURE1);
-            glBindTexture(GL_TEXTURE_2D, texture2);
-            
-            glBindVertexArray(VAO);
-            glDrawElements(GL_TRIANGLES, 3*counts, GL_UNSIGNED_INT, 0);
+            glBindTexture(GL_TEXTURE_2D, *texture);
+
     //        线框模式绘制
 //            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     //        默认模式绘制
             glPolygonMode(GL_FRONT, GL_FILL);
+            shader->setVec3("viewPos", cameraPos);
 
-            float time = glfwGetTime();
-            float light = abs(sin(time));
-    //        int loc = glad_glGetUniformLocation(shaderProgram,"ourColorFactor");
-    //
-    //     需要注意的是：查询uniform地址不要求你之前使用过着色器程序，
-    //     但是更新一个uniform之前你必须先使用程序（调用glUseProgram)，
-    //     因为它是在当前激活的着色器程序中设置uniform的。
-    //     说是这么说。。。。。。我直接使用也是ok的
-    //        glad_glUniform1f(loc,light);
-    //        glad_glUseProgram(shaderProgram);
-            shader->setFloat("ourColorFactor", light);
+            shader->setVec3("material.ambient",  0.1f, 0.1f, 0.1f);
+            shader->setVec3("material.diffuse",  1.0f, 1.0f, 0.31f);
+            shader->setVec3("material.specular", 0.5f, 0.5f, 0.5f);
+            shader->setFloat("material.shininess", 64.0f);
+            
+//            shader->setVec3("light.position",  lightPos);
+            shader->setVec3("light.ambient",  lightColor);
+            shader->setVec3("light.diffuse",  lightColor);
+            shader->setVec3("light.specular", lightColor);
+            
+            shader->setFloat("light.constant", 1.0f);
+            shader->setFloat("light.linear", 0.14f);
+            shader->setFloat("light.quadratic", 0.07f);
+            
+            shader->setVec3("light.position",  cameraPos);
+            shader->setVec3("light.direction", cameraFront);
+            shader->setFloat("light.cutOff",   glm::cos(glm::radians(9.5f)));
+            shader->setFloat("light.outerCutOff",   glm::cos(glm::radians(12.9f)));
+            
+            
+            setTransform(shader,cubePositions[i]);
             shader->use();
             
-            // create transformations
-            glm::mat4 model         = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
-            glm::mat4 view          = glm::mat4(1.0f);
-            glm::mat4 projection    = glm::mat4(1.0f);
-            
-//        OLD
-//            model = glm::rotate(model, glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-//            view  = glm::translate(view, glm::vec3(x, y, -3.0f));
-//            projection = glm::perspective(glm::radians(0.0f), (float)screenWidth / (float)screenHeight, 0.1f, 40.0f);
-            
-            
-//            NEW
-//            Eye,Center,Up
-            model = glm::translate(model, cubePositions[i]);
-            float angle = 20.0f * i;
-            model = glm::rotate(model, glm::radians(angle), glm::vec3(0.0f, 1.0f, 0.0f));
-            model = glm::scale(model, glm::vec3(scale,scale,scale));
-            
-            view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-            // pass projection matrix to shader (note that in this case it could change every frame)
-            projection = glm::perspective(glm::radians(fov), (float)screenWidth / (float)screenHeight, 0.1f, 100.0f);
-            
-    ////      TRANSLATION
-            glm::mat4 transform = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
-//            transform = glm::scale(transform, glm::vec3(scale,scale,scale));
-//            transform = glm::translate(transform, glm::vec3(cubePositions[i]));
-//            transform = glm::rotate(transform, scale, glm::vec3(0.0f, 1.0f, 0.0f));
-    ////      TRANSLATION
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
 
-            unsigned int transformLoc = glGetUniformLocation(shader->ID, "model");
-            glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(model));
+        for(unsigned int i = 1; i < 2; i++)
+        {
             
-            transformLoc = glGetUniformLocation(shader->ID, "view");
-            glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(view));
+            glBindVertexArray(VAO2);
+            lightshader->use();
+            lightshader->setVec3("lightColor", 1.0f,1.0f,1.0f);
+
+            setTransform(lightshader,lightPos,glm::vec3( 0.1f,  0.1f, 0.1f));
+            lightshader->use();
             
-            transformLoc = glGetUniformLocation(shader->ID, "projection");
-            glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(projection));
-            
-            transformLoc = glGetUniformLocation(shader->ID, "transform");
-            glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
-            
+            glDrawArrays(GL_TRIANGLES, 0, 36);
         }
 
         glfwSwapBuffers(window);
@@ -409,3 +414,4 @@ int main(int argc, const char * argv[]) {
     
     return 0;
 }
+
