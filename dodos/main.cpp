@@ -8,20 +8,23 @@
 #include "glad/glad.h"
 #include "glfw3.h"
 #include "math.h"
-#include "imgRender/Model.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
 #include "shader/shader.hpp"
+#include "model/Model.hpp"
 #include "stb_image.h"
 
 #include <iostream>
 
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+
 const int screenWidth = 800;
 const int screenHeight = 600;
-
 
 glm::vec3 cameraPos   = glm::vec3(0.0f, 0.0f,  3.0f);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
@@ -167,6 +170,84 @@ void setTransform(Shader* shader,glm::vec3 position){
     setTransform(shader,position,glm::vec3(1.0f,1.0f,1.0f));
 }
 
+void setUpDirLight(Shader* shader,glm::vec3 dir,glm::vec3 color){
+//    struct DirLight {
+//        vec3 direction;
+//
+//        vec3 ambient;
+//        vec3 diffuse;
+//        vec3 specular;
+//    };
+//    uniform DirLight dirLight;
+    shader->setVec3("dirLight.direction",dir);
+    shader->setVec3("dirLight.ambient",color*0.1f);
+    shader->setVec3("dirLight.diffuse",color*0.1f);
+    shader->setVec3("dirLight.specular",color*0.1f);
+}
+
+void setUpPointLight(Shader* shader,glm::vec3 position,glm::vec3 color,glm::vec3 paras,int index){
+//    struct PointLight {
+//        vec3 position;
+//
+//        float constant;
+//        float linear;
+//        float quadratic;
+//
+//        vec3 ambient;
+//        vec3 diffuse;
+//        vec3 specular;
+//    };
+//    #define NR_POINT_LIGHTS 4
+//    uniform PointLight pointLights[NR_POINT_LIGHTS];
+    std::ostringstream   ostr;
+    ostr<<"pointLights["<<index<<"]";
+    std::string str = ostr.str();
+    
+    shader->setVec3((str+".position").c_str(),position);
+    shader->setFloat((str+".constant").c_str(),paras.x);
+    shader->setFloat((str+".linear").c_str(),paras.y);
+    shader->setFloat((str+".quadratic").c_str(),paras.z);
+    shader->setVec3((str+".ambient").c_str(),color*0.0f);
+    shader->setVec3((str+".diffuse").c_str(),color);
+    shader->setVec3((str+".specular").c_str(),color);
+}
+
+//void setUpSpotLight(Shader* shader,glm::vec3 position,glm::vec3 color,glm::vec3 direction,int index){
+void setUpSpotLight(Shader* shader,glm::vec3 position,glm::vec3 color,glm::vec3 direction,int index){
+
+//    struct SpotLight {
+//        vec3 position;
+//        vec3 direction;
+//
+//        float outerCutOff;
+//        float cutOff;
+//
+//        vec3 ambient;
+//        vec3 diffuse;
+//        vec3 specular;
+//
+//        float constant;
+//        float linear;
+//        float quadratic;
+//    };
+    std::ostringstream   ostr;
+    ostr<<"spotLights["<<index<<"]";
+    std::string str = ostr.str();
+    
+    shader->setVec3((str+".position").c_str(),position);
+    shader->setVec3((str+".direction").c_str(),direction);
+    shader->setVec3((str+".ambient").c_str(),color*0.0f);
+    shader->setVec3((str+".diffuse").c_str(),color);
+    shader->setVec3((str+".specular").c_str(),color);
+    
+    shader->setFloat((str+".outerCutOff").c_str(),glm::cos(glm::radians(12.5f)));
+    shader->setFloat((str+".cutOff").c_str(),glm::cos(glm::radians(10.0f)));
+    
+    shader->setFloat((str+".constant").c_str(), 1.0f);
+    shader->setFloat((str+".linear").c_str(), 0.09);
+    shader->setFloat((str+".quadratic").c_str(), 0.032);
+}
+
 
 int main(int argc, const char * argv[]) {
     
@@ -182,7 +263,8 @@ int main(int argc, const char * argv[]) {
 
     //  窗口
     GLFWwindow* window = glfwCreateWindow(screenWidth, screenHeight, "Learn", nullptr, nullptr);
-    
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
     if(window==nullptr){
         glfwTerminate();
         return -1;
@@ -195,135 +277,20 @@ int main(int argc, const char * argv[]) {
         std::cout << "Failed to initialize GLAD" << std::endl;
         return -1;
     }
-    Shader* shader = new Shader("shader/test.vert","shader/test.frag");
-//    shader->use();
     
-    Shader* lightshader = new Shader("shader/light.vert","shader/light.frag");
-//    lightshader->use();
+    glEnable(GL_DEPTH_TEST);
     
-    float vertices[] = {
-        -0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f, -0.5f,
-         0.5f,  0.5f, -0.5f,
-         0.5f,  0.5f, -0.5f,
-        -0.5f,  0.5f, -0.5f,
-        -0.5f, -0.5f, -0.5f,
-
-        -0.5f, -0.5f,  0.5f,
-         0.5f, -0.5f,  0.5f,
-         0.5f,  0.5f,  0.5f,
-         0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f,  0.5f,
-        -0.5f, -0.5f,  0.5f,
-
-        -0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f, -0.5f,
-        -0.5f, -0.5f, -0.5f,
-        -0.5f, -0.5f, -0.5f,
-        -0.5f, -0.5f,  0.5f,
-        -0.5f,  0.5f,  0.5f,
-
-         0.5f,  0.5f,  0.5f,
-         0.5f,  0.5f, -0.5f,
-         0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f,  0.5f,
-         0.5f,  0.5f,  0.5f,
-
-        -0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f,  0.5f,
-         0.5f, -0.5f,  0.5f,
-        -0.5f, -0.5f,  0.5f,
-        -0.5f, -0.5f, -0.5f,
-
-        -0.5f,  0.5f, -0.5f,
-         0.5f,  0.5f, -0.5f,
-         0.5f,  0.5f,  0.5f,
-         0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f, -0.5f,
-    };
+    Shader shader("shader/test.vert","shader/test.frag");
+    shader.use();
     
-    float vertices2[] = {
-        // positions          // normals           // texture coords
-        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
-         0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f,
-         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
-         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
+    Model newModel("Resource/diablo/diablo3_pose.obj");
+    newModel.meshes[0].setTexture("Resource/diablo/diablo3_pose_diffuse.tga","texture_diffuse");
+    newModel.meshes[0].setTexture("Resource/diablo/diablo3_pose_spec.tga","texture_specular");
+    newModel.meshes[0].setTexture("Resource/diablo/diablo3_pose_nm.tga","texture_normal");
 
-        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
-         0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
-
-        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-
-         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-         0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-         0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-
-        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
-         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
-
-        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
-         0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
-    };
-    
-    unsigned int indices[] = {  // note that we start from 0!
-        0, 1, 3,  // first Triangle
-        1, 2, 3,   // second Triangle
-    };
-    unsigned int VBO, VAO, EBO;
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glBindVertexArray(VAO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-    unsigned int* texture = getImage("Resource/qiyana.jpeg");
-    
-    unsigned int VAO2,VBO2;
-    glGenVertexArrays(1, &VAO2);
-    glGenBuffers(1, &VBO2);
-    glBindVertexArray(VAO2);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO2);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices2), vertices2, GL_STATIC_DRAW);
-    
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3*sizeof(float)));
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6*sizeof(float)));
-    glEnableVertexAttribArray(2);
-    glBindTexture(GL_TEXTURE_2D, *texture);
-    
     glm::vec3 cubePositions[] = {
       glm::vec3( 0.0f,  0.0f,  0.0f),
-      glm::vec3( 1.5f,  1.5f, -1.5f),
+      glm::vec3( 2.0f,  5.0f, -15.0f),
       glm::vec3(-1.5f, -2.2f, -2.5f),
       glm::vec3(-3.8f, -2.0f, -12.3f),
       glm::vec3( 2.4f, -0.4f, -3.5f),
@@ -333,80 +300,24 @@ int main(int argc, const char * argv[]) {
       glm::vec3( 1.5f,  0.2f, -1.5f),
       glm::vec3(-1.3f,  1.0f, -1.5f)
     };
-    
-    glm::vec3 lightPos = glm::vec3( 0.0f,  0.4f, 1.5f);
-    glm::vec3 lightColor = glm::vec3( 1.0f,  1.0f, 1.0f);
-
-    glEnable(GL_DEPTH_TEST);
 
     while(!glfwWindowShouldClose(window))
     {
-        float time = glfwGetTime();
-        lightPos = glm::vec3( 5.0f*sin(time),  0.1f, -5.0f*cos(time));
 //        input
         processInput(window);
         
-        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-        
         glfwSetCursorPosCallback(window, mouse_callback);
         
-        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
-        for(unsigned int i = 0; i < 10; i++)
-        {
-            glBindVertexArray(VAO2);
-            shader->use();
-            shader->setInt("texture1", 0); // 设置贴图
-            // 多个纹理需要激活纹理单元
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, *texture);
-
-    //        线框模式绘制
-//            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    //        默认模式绘制
-            glPolygonMode(GL_FRONT, GL_FILL);
-            shader->setVec3("viewPos", cameraPos);
-
-            shader->setVec3("material.ambient",  0.1f, 0.1f, 0.1f);
-            shader->setVec3("material.diffuse",  1.0f, 1.0f, 0.31f);
-            shader->setVec3("material.specular", 0.5f, 0.5f, 0.5f);
-            shader->setFloat("material.shininess", 64.0f);
-            
-//            shader->setVec3("light.position",  lightPos);
-            shader->setVec3("light.ambient",  lightColor);
-            shader->setVec3("light.diffuse",  lightColor);
-            shader->setVec3("light.specular", lightColor);
-            
-            shader->setFloat("light.constant", 1.0f);
-            shader->setFloat("light.linear", 0.14f);
-            shader->setFloat("light.quadratic", 0.07f);
-            
-            shader->setVec3("light.position",  cameraPos);
-            shader->setVec3("light.direction", cameraFront);
-            shader->setFloat("light.cutOff",   glm::cos(glm::radians(9.5f)));
-            shader->setFloat("light.outerCutOff",   glm::cos(glm::radians(12.9f)));
-            
-            
-            setTransform(shader,cubePositions[i]);
-            shader->use();
-            
-            glDrawArrays(GL_TRIANGLES, 0, 36);
-        }
-
-        for(unsigned int i = 1; i < 2; i++)
-        {
-            
-            glBindVertexArray(VAO2);
-            lightshader->use();
-            lightshader->setVec3("lightColor", 1.0f,1.0f,1.0f);
-
-            setTransform(lightshader,lightPos,glm::vec3( 0.1f,  0.1f, 0.1f));
-            lightshader->use();
-            
-            glDrawArrays(GL_TRIANGLES, 0, 36);
-        }
-
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glPolygonMode(GL_FRONT, GL_FILL);
+        
+        newModel.Draw(shader);
+        setTransform(&shader,glm::vec3( 0.0f,  0.0f,  0.0f),glm::vec3( 1.1f,  1.1f,  1.1f));
+        
+        setUpSpotLight(&shader, cameraPos, glm::vec3(0.0f,0.0f,0.0f), cameraFront, 0);
+        
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
