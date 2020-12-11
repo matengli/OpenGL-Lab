@@ -180,9 +180,9 @@ void setUpDirLight(Shader* shader,glm::vec3 dir,glm::vec3 color){
 //    };
 //    uniform DirLight dirLight;
     shader->setVec3("dirLight.direction",dir);
-    shader->setVec3("dirLight.ambient",color*0.1f);
-    shader->setVec3("dirLight.diffuse",color*0.1f);
-    shader->setVec3("dirLight.specular",color*0.1f);
+    shader->setVec3("dirLight.ambient",color);
+    shader->setVec3("dirLight.diffuse",color);
+    shader->setVec3("dirLight.specular",color);
 }
 
 void setUpPointLight(Shader* shader,glm::vec3 position,glm::vec3 color,glm::vec3 paras,int index){
@@ -308,6 +308,10 @@ int main(int argc, const char * argv[]) {
         
         glfwSetCursorPosCallback(window, mouse_callback);
         
+        shader.use();
+        shader.setVec3("viewDir", cameraPos);
+        shader.setFloat("Material.shininess", 64.0f);
+        shader.use();
         
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -316,7 +320,9 @@ int main(int argc, const char * argv[]) {
         newModel.Draw(shader);
         setTransform(&shader,glm::vec3( 0.0f,  0.0f,  0.0f),glm::vec3( 1.1f,  1.1f,  1.1f));
         
-        setUpSpotLight(&shader, cameraPos, glm::vec3(0.0f,0.0f,0.0f), cameraFront, 0);
+        setUpDirLight(&shader, glm::vec3(1.0f,1.0f,1.0f), 0.3f*glm::vec3(1.0f,1.0f,1.0f));
+        
+        setUpSpotLight(&shader, cameraPos, glm::vec3(11.5f,11.5f,11.5f), cameraFront, 0);
         
         glfwSwapBuffers(window);
         glfwPollEvents();
