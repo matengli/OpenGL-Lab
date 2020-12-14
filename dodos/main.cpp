@@ -282,7 +282,7 @@ int main(int argc, const char * argv[]) {
     glEnable(GL_STENCIL_TEST);
 //    glDepthFunc(GL_ALWAYS);
     
-    Shader shaderSingle("shader/light.vert","shader/light.frag");
+    Shader shaderSingle("shader/window.vert","shader/window.frag");
     shaderSingle.use();
     
     Shader shader("shader/test.vert","shader/test.frag");
@@ -307,54 +307,108 @@ int main(int argc, const char * argv[]) {
       glm::vec3( 1.5f,  0.2f, -1.5f),
       glm::vec3(-1.3f,  1.0f, -1.5f)
     };
+    
+//    创建帧缓冲
+    unsigned int framebuffer;
+    glGenFramebuffers(1, &framebuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+    
+//    创建texture
+    unsigned int textureColorbuffer;
+    glGenTextures(1, &textureColorbuffer);
+    glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 800, 600, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    
+//    将texture绑定到texture上
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorbuffer, 0);
+    
+//    创建渲染对象
+    unsigned int rbo;
+    glGenRenderbuffers(1, &rbo);
+    glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+//    创建模版，深度缓冲
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 800, 600);
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    
+//    将渲染对象绑定到framebuffer上
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
+    
+//    检查完整性
+    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
+//    解绑
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    
+    float quadVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
+        // positions   // texCoords
+        -1.0f,  1.0f,  0.0f, 1.0f,
+        -1.0f, -1.0f,  0.0f, 0.0f,
+         1.0f, -1.0f,  1.0f, 0.0f,
+
+        -1.0f,  1.0f,  0.0f, 1.0f,
+         1.0f, -1.0f,  1.0f, 0.0f,
+         1.0f,  1.0f,  1.0f, 1.0f
+    };
+    
+    // screen quad VAO
+    unsigned int quadVAO, quadVBO;
+    glGenVertexArrays(1, &quadVAO);
+    glGenBuffers(1, &quadVBO);
+    glBindVertexArray(quadVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 
     while(!glfwWindowShouldClose(window))
     {
-        glEnable(GL_DEPTH_TEST);
-
-        glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-        
-//        input
-        processInput(window);
-        
-        glfwSetCursorPosCallback(window, mouse_callback);
-        
-        glStencilMask(0x00); // 记得保证我们在绘制地板的时候不会更新模板缓冲
-        shader.use();
-        shader.setVec3("viewDir", cameraPos);
-        shader.setFloat("Material.shininess", 16.0f);
-        shader.use();
-        
+        glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glPolygonMode(GL_FRONT, GL_FILL);
-        
-        setTransform(&shader,glm::vec3( 0.0f,  0.5f,  0.0f),glm::vec3( 1.1f,  1.1f,  1.1f));
-        newModel.Draw(shader);
-        
-        setTransform(&shader,glm::vec3( 2.0f,  0.5f,  0.0f),glm::vec3( 1.1f,  1.1f,  1.1f));
-        newModel.Draw(shader);
-        
-//        setUpPointLight(&shader, cameraPos, 5.0f*glm::vec3(1.0f,1.0f,1.0f), glm::vec3(1.0f,0.7f,1.8f), 0);
-//        setUpDirLight(&shader, glm::vec3(1.0f,1.0f,1.0f), 0.3f*glm::vec3(1.0f,1.0f,1.0f));
-        
-        setUpSpotLight(&shader, cameraPos, 2.0f*glm::vec3(1.0f,1.0f,1.0f), cameraFront, 0);
-        
-        
-        glStencilFunc(GL_ALWAYS, 1, 0xFF);
-        glStencilMask(0xFF);
-        setTransform(&shader,glm::vec3( -2.0f,  0.0f,  0.0f),glm::vec3( 0.1f,  0.1f,  0.1f));
-        newModelf.Draw(shader);
-        
-        glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-        glStencilMask(0x00);
-        glDisable(GL_DEPTH_TEST);
-        shaderSingle.use();
-        setTransform(&shaderSingle,glm::vec3( -2.0f,  0.0f,  0.0f),glm::vec3( 0.101f,  0.101f,  0.101f));
-        newModelf.Draw(shader);
-        shaderSingle.use();
-        glStencilMask(0xFF);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
         glEnable(GL_DEPTH_TEST);
+        
+//        drawScene
+        {
+            processInput(window);
+            glfwSetCursorPosCallback(window, mouse_callback);
+        
+            shader.use();
+            shader.setVec3("viewDir", cameraPos);
+            shader.setFloat("Material.shininess", 16.0f);
+            shader.use();
+            
+            glPolygonMode(GL_FRONT, GL_FILL);
+            
+            setTransform(&shader,glm::vec3( 0.0f,  0.5f,  0.0f),glm::vec3( 1.1f,  1.1f,  1.1f));
+            newModel.Draw(shader);
+            
+            setTransform(&shader,glm::vec3( 2.0f,  0.5f,  0.0f),glm::vec3( 1.1f,  1.1f,  1.1f));
+            newModel.Draw(shader);
+            
+    //        setUpPointLight(&shader, cameraPos, 5.0f*glm::vec3(1.0f,1.0f,1.0f), glm::vec3(1.0f,0.7f,1.8f), 0);
+            setUpDirLight(&shader, glm::vec3(1.0f,1.0f,1.0f), 1.3f*glm::vec3(1.0f,1.0f,1.0f));
+            
+            setUpSpotLight(&shader, cameraPos, 4.0f*glm::vec3(1.0f,1.0f,1.0f), cameraFront, 0);
+            
+            setTransform(&shader,glm::vec3( -2.0f,  0.0f,  0.0f),glm::vec3( 0.101f,  0.101f,  0.101f));
+            newModelf.Draw(shader);
+        }
+        
+        // 第二处理阶段
+        glBindFramebuffer(GL_FRAMEBUFFER, 0); // 返回默认
+        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+        
+        shaderSingle.use();
+        glBindVertexArray(quadVAO);
+        glDisable(GL_DEPTH_TEST);
+        glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
         
         glfwSwapBuffers(window);
         glfwPollEvents();

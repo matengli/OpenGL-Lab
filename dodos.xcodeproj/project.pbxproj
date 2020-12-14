@@ -151,6 +151,8 @@
 		1C504F3E258345B100008FAD /* diablo3_pose_nm.tga */ = {isa = PBXFileReference; lastKnownFileType = file; path = diablo3_pose_nm.tga; sourceTree = "<group>"; };
 		1C504F3F258345B200008FAD /* diablo3_pose_nm_tangent.tga */ = {isa = PBXFileReference; lastKnownFileType = file; path = diablo3_pose_nm_tangent.tga; sourceTree = "<group>"; };
 		1C504F40258345B200008FAD /* diablo3_pose_spec.tga */ = {isa = PBXFileReference; lastKnownFileType = file; path = diablo3_pose_spec.tga; sourceTree = "<group>"; };
+		1C8465A4258767B500563539 /* window.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = window.vert; sourceTree = "<group>"; };
+		1C8465A5258767B500563539 /* window.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = window.frag; sourceTree = "<group>"; };
 		1CA21E45257E50390054250D /* qiyana.jpeg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = qiyana.jpeg; sourceTree = "<group>"; };
 		1CA21E46257F27030054250D /* light.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = light.frag; sourceTree = "<group>"; };
 		1CA21E47257F27030054250D /* light.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = light.vert; sourceTree = "<group>"; };
@@ -471,6 +473,8 @@
 		1CE88EA025381EAF005CC41B /* shader */ = {
 			isa = PBXGroup;
 			children = (
+				1C8465A5258767B500563539 /* window.frag */,
+				1C8465A4258767B500563539 /* window.vert */,
 				1CA21E46257F27030054250D /* light.frag */,
 				1CA21E47257F27030054250D /* light.vert */,
 				1CE88EA125381EAF005CC41B /* test.frag */,
