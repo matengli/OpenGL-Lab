@@ -241,7 +241,7 @@ void setUpSpotLight(Shader* shader,glm::vec3 position,glm::vec3 color,glm::vec3 
     shader->setVec3((str+".specular").c_str(),color);
     
     shader->setFloat((str+".outerCutOff").c_str(),glm::cos(glm::radians(12.5f)));
-    shader->setFloat((str+".cutOff").c_str(),glm::cos(glm::radians(10.0f)));
+    shader->setFloat((str+".cutOff").c_str(),glm::cos(glm::radians(2.0f)));
     
     shader->setFloat((str+".constant").c_str(), 1.0f);
     shader->setFloat((str+".linear").c_str(), 0.09);
@@ -278,15 +278,22 @@ int main(int argc, const char * argv[]) {
         return -1;
     }
     
-    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+    glEnable(GL_STENCIL_TEST);
+//    glDepthFunc(GL_ALWAYS);
+    
+    Shader shaderSingle("shader/light.vert","shader/light.frag");
+    shaderSingle.use();
     
     Shader shader("shader/test.vert","shader/test.frag");
     shader.use();
     
     Model newModel("Resource/diablo/diablo3_pose.obj");
-    newModel.meshes[0].setTexture("Resource/diablo/diablo3_pose_diffuse.tga","texture_diffuse");
     newModel.meshes[0].setTexture("Resource/diablo/diablo3_pose_spec.tga","texture_specular");
+    newModel.meshes[0].setTexture("Resource/diablo/diablo3_pose_diffuse.tga","texture_diffuse");
     newModel.meshes[0].setTexture("Resource/diablo/diablo3_pose_nm.tga","texture_normal");
+    
+    Model newModelf("Resource/nanosuit/nanosuit.obj");
 
     glm::vec3 cubePositions[] = {
       glm::vec3( 0.0f,  0.0f,  0.0f),
@@ -303,26 +310,51 @@ int main(int argc, const char * argv[]) {
 
     while(!glfwWindowShouldClose(window))
     {
+        glEnable(GL_DEPTH_TEST);
+
+        glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+        
 //        input
         processInput(window);
         
         glfwSetCursorPosCallback(window, mouse_callback);
         
+        glStencilMask(0x00); // 记得保证我们在绘制地板的时候不会更新模板缓冲
         shader.use();
         shader.setVec3("viewDir", cameraPos);
-        shader.setFloat("Material.shininess", 64.0f);
+        shader.setFloat("Material.shininess", 16.0f);
         shader.use();
         
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glPolygonMode(GL_FRONT, GL_FILL);
         
+        setTransform(&shader,glm::vec3( 0.0f,  0.5f,  0.0f),glm::vec3( 1.1f,  1.1f,  1.1f));
         newModel.Draw(shader);
-        setTransform(&shader,glm::vec3( 0.0f,  0.0f,  0.0f),glm::vec3( 1.1f,  1.1f,  1.1f));
         
-        setUpDirLight(&shader, glm::vec3(1.0f,1.0f,1.0f), 0.3f*glm::vec3(1.0f,1.0f,1.0f));
+        setTransform(&shader,glm::vec3( 2.0f,  0.5f,  0.0f),glm::vec3( 1.1f,  1.1f,  1.1f));
+        newModel.Draw(shader);
         
-        setUpSpotLight(&shader, cameraPos, glm::vec3(11.5f,11.5f,11.5f), cameraFront, 0);
+//        setUpPointLight(&shader, cameraPos, 5.0f*glm::vec3(1.0f,1.0f,1.0f), glm::vec3(1.0f,0.7f,1.8f), 0);
+//        setUpDirLight(&shader, glm::vec3(1.0f,1.0f,1.0f), 0.3f*glm::vec3(1.0f,1.0f,1.0f));
+        
+        setUpSpotLight(&shader, cameraPos, 2.0f*glm::vec3(1.0f,1.0f,1.0f), cameraFront, 0);
+        
+        
+        glStencilFunc(GL_ALWAYS, 1, 0xFF);
+        glStencilMask(0xFF);
+        setTransform(&shader,glm::vec3( -2.0f,  0.0f,  0.0f),glm::vec3( 0.1f,  0.1f,  0.1f));
+        newModelf.Draw(shader);
+        
+        glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+        glStencilMask(0x00);
+        glDisable(GL_DEPTH_TEST);
+        shaderSingle.use();
+        setTransform(&shaderSingle,glm::vec3( -2.0f,  0.0f,  0.0f),glm::vec3( 0.101f,  0.101f,  0.101f));
+        newModelf.Draw(shader);
+        shaderSingle.use();
+        glStencilMask(0xFF);
+        glEnable(GL_DEPTH_TEST);
         
         glfwSwapBuffers(window);
         glfwPollEvents();
