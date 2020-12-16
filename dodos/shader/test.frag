@@ -15,8 +15,9 @@ uniform sampler2D texture_diffuse1;
 uniform sampler2D texture_normal1;
 uniform sampler2D texture_specular1;
 
-uniform sampler2D fuck;
+uniform samplerCube skybox;
 
+uniform bool isNormalTextureMap;
 
 struct Material {
     sampler2D diffuse;
@@ -149,8 +150,12 @@ float LinearizeDepth(float depth)
 
 void main()
 {
-    vec3 norm = normalize(Normal);
-//    vec3 norm = normalize(texture(texture_normal1, TexCoords).xyz*9.0f-1.0f);
+    vec3 norm = vec3(0.1f);
+    if(isNormalTextureMap){
+        norm = normalize(texture(texture_normal1, TexCoords).xyz*2.0f-1.0f);
+    }else{
+        norm = normalize(Normal);
+    }
     
     vec3 viewDir = normalize(viewPos - FragPos);
 //
@@ -163,9 +168,18 @@ void main()
     for(int i = 0; i < NR_SPOT_LIGHTS; i++){
         result += CalcSpotLight(spotLights[i], norm, FragPos, viewDir);
     }
-    
+
 //    FragColor = vec4(vec3(gl_FragCoord.z), 1.0);
 //    float depth = LinearizeDepth(gl_FragCoord.z) / far; // 为了演示除以 far
 //    FragColor = vec4(vec3(depth), 1.0);
     FragColor = vec4(result,1.0f);
+    
+////    vec3 R = reflect(viewDir, norm);
+//    float ratio = 1.00 / 1.52;
+////    vec3 I = normalize(Position - cameraPos);
+//    vec3 R = refract(viewDir, norm, ratio);
+//    if(isNormalTextureMap){
+//        R = reflect(viewDir, norm);
+//    }
+//    FragColor = 2.0f*vec4(texture(skybox, R).rgb, 1.0);
 }

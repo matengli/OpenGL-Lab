@@ -37,6 +37,9 @@ float lastX =  800.0f / 2.0;
 float lastY =  600.0 / 2.0;
 float fov   =  45.0f;
 
+float factor1 = 0.0f;
+int factor2 = 0;
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
@@ -59,6 +62,16 @@ void processInput(GLFWwindow *window)
         cameraPos += cameraSpeed * cameraUp;
     if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
         cameraPos -= cameraSpeed * cameraUp;
+    
+    if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+        factor1 -= 0.1f;
+    if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+        factor1 += 0.1f;
+    
+    if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS)
+        factor2 = 1;
+    if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
+        factor2 = 0;
 }
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
@@ -143,6 +156,7 @@ void setTransform(Shader* shader,glm::vec3 position,glm::vec3 scale){
     glm::mat4 projection    = glm::mat4(1.0f);
 
     model = glm::translate(model, position);
+//    model = glm::translate(model, glm::vec3(sin(time),0,cos(time)));
     model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     model = glm::scale(model, scale);
     
@@ -248,6 +262,124 @@ void setUpSpotLight(Shader* shader,glm::vec3 position,glm::vec3 color,glm::vec3 
     shader->setFloat((str+".quadratic").c_str(), 0.032);
 }
 
+unsigned int getQuadVAO(){
+    float quadVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
+        // positions   // texCoords
+        -1.0f,  1.0f,  0.0f, 1.0f,
+        -1.0f, -1.0f,  0.0f, 0.0f,
+         1.0f, -1.0f,  1.0f, 0.0f,
+
+        -1.0f,  1.0f,  0.0f, 1.0f,
+         1.0f, -1.0f,  1.0f, 0.0f,
+         1.0f,  1.0f,  1.0f, 1.0f
+    };
+    
+    // screen quad VAO
+    unsigned int quadVAO, quadVBO;
+    glGenVertexArrays(1, &quadVAO);
+    glGenBuffers(1, &quadVBO);
+    glBindVertexArray(quadVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+    
+    return quadVAO;
+}
+
+//unsigned int getCubeVAO(){
+//
+//}
+
+unsigned int getSkyBoxVAO(){
+    float skyboxVertices[] = {
+        // positions
+        -1.0f,  1.0f, -1.0f,
+        -1.0f, -1.0f, -1.0f,
+         1.0f, -1.0f, -1.0f,
+         1.0f, -1.0f, -1.0f,
+         1.0f,  1.0f, -1.0f,
+        -1.0f,  1.0f, -1.0f,
+
+        -1.0f, -1.0f,  1.0f,
+        -1.0f, -1.0f, -1.0f,
+        -1.0f,  1.0f, -1.0f,
+        -1.0f,  1.0f, -1.0f,
+        -1.0f,  1.0f,  1.0f,
+        -1.0f, -1.0f,  1.0f,
+
+         1.0f, -1.0f, -1.0f,
+         1.0f, -1.0f,  1.0f,
+         1.0f,  1.0f,  1.0f,
+         1.0f,  1.0f,  1.0f,
+         1.0f,  1.0f, -1.0f,
+         1.0f, -1.0f, -1.0f,
+
+        -1.0f, -1.0f,  1.0f,
+        -1.0f,  1.0f,  1.0f,
+         1.0f,  1.0f,  1.0f,
+         1.0f,  1.0f,  1.0f,
+         1.0f, -1.0f,  1.0f,
+        -1.0f, -1.0f,  1.0f,
+
+        -1.0f,  1.0f, -1.0f,
+         1.0f,  1.0f, -1.0f,
+         1.0f,  1.0f,  1.0f,
+         1.0f,  1.0f,  1.0f,
+        -1.0f,  1.0f,  1.0f,
+        -1.0f,  1.0f, -1.0f,
+
+        -1.0f, -1.0f, -1.0f,
+        -1.0f, -1.0f,  1.0f,
+         1.0f, -1.0f, -1.0f,
+         1.0f, -1.0f, -1.0f,
+        -1.0f, -1.0f,  1.0f,
+         1.0f, -1.0f,  1.0f
+    };
+    unsigned int skyboxVAO, skyboxVBO;
+    glGenVertexArrays(1, &skyboxVAO);
+    glGenBuffers(1, &skyboxVBO);
+    glBindVertexArray(skyboxVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    
+    return skyboxVAO;;
+}
+unsigned int loadCubemap(vector<std::string> faces)
+{
+    unsigned int textureID;
+    glGenTextures(1, &textureID);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+
+    int width, height, nrChannels;
+    for (unsigned int i = 0; i < faces.size(); i++)
+    {
+        unsigned char *data = stbi_load(faces[i].c_str(), &width, &height, &nrChannels, 0);
+        if (data)
+        {
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+                         0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data
+            );
+            stbi_image_free(data);
+        }
+        else
+        {
+            std::cout << "Cubemap texture failed to load at path: " << faces[i] << std::endl;
+            stbi_image_free(data);
+        }
+    }
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+    return textureID;
+}
 
 int main(int argc, const char * argv[]) {
     
@@ -288,12 +420,20 @@ int main(int argc, const char * argv[]) {
     Shader shader("shader/test.vert","shader/test.frag");
     shader.use();
     
+    Shader noramlShowShader("shader/normalShow.vert","shader/normalShow.frag","shader/normalShow.gs");
+    noramlShowShader.use();
+    
     Model newModel("Resource/diablo/diablo3_pose.obj");
     newModel.meshes[0].setTexture("Resource/diablo/diablo3_pose_spec.tga","texture_specular");
     newModel.meshes[0].setTexture("Resource/diablo/diablo3_pose_diffuse.tga","texture_diffuse");
     newModel.meshes[0].setTexture("Resource/diablo/diablo3_pose_nm.tga","texture_normal");
     
     Model newModelf("Resource/nanosuit/nanosuit.obj");
+    
+    
+    Shader shaderSky("shader/light.vert","shader/light.frag");
+    shaderSky.use();
+    unsigned int skyVAO = getSkyBoxVAO();
 
     glm::vec3 cubePositions[] = {
       glm::vec3( 0.0f,  0.0f,  0.0f),
@@ -341,34 +481,26 @@ int main(int argc, const char * argv[]) {
         std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
 //    解绑
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    
-    float quadVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
-        // positions   // texCoords
-        -1.0f,  1.0f,  0.0f, 1.0f,
-        -1.0f, -1.0f,  0.0f, 0.0f,
-         1.0f, -1.0f,  1.0f, 0.0f,
 
-        -1.0f,  1.0f,  0.0f, 1.0f,
-         1.0f, -1.0f,  1.0f, 0.0f,
-         1.0f,  1.0f,  1.0f, 1.0f
-    };
+    unsigned int quadVAO = getQuadVAO();
+    factor1 = 0.2f;
     
-    // screen quad VAO
-    unsigned int quadVAO, quadVBO;
-    glGenVertexArrays(1, &quadVAO);
-    glGenBuffers(1, &quadVBO);
-    glBindVertexArray(quadVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+    vector<std::string> faces
+    {
+        "Resource/skyBox/right.jpg",
+        "Resource/skyBox/left.jpg",
+        "Resource/skyBox/top.jpg",
+        "Resource/skyBox/bottom.jpg",
+        "Resource/skyBox/front.jpg",
+        "Resource/skyBox/back.jpg"
+    };
+   
+    unsigned int cubemapTexture = loadCubemap(faces);
 
     while(!glfwWindowShouldClose(window))
     {
         glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
         glEnable(GL_DEPTH_TEST);
         
@@ -377,39 +509,72 @@ int main(int argc, const char * argv[]) {
             processInput(window);
             glfwSetCursorPosCallback(window, mouse_callback);
         
+            {
             shader.use();
             shader.setVec3("viewDir", cameraPos);
             shader.setFloat("Material.shininess", 16.0f);
             shader.use();
-            
+
             glPolygonMode(GL_FRONT, GL_FILL);
             
-            setTransform(&shader,glm::vec3( 0.0f,  0.5f,  0.0f),glm::vec3( 1.1f,  1.1f,  1.1f));
-            newModel.Draw(shader);
-            
+//            setTransform(&shader,glm::vec3( 0.0f,  0.5f,  0.0f),glm::vec3( 1.1f,  1.1f,  1.1f));
+//            newModel.Draw(shader);
+//
             setTransform(&shader,glm::vec3( 2.0f,  0.5f,  0.0f),glm::vec3( 1.1f,  1.1f,  1.1f));
             newModel.Draw(shader);
-            
+                
+
     //        setUpPointLight(&shader, cameraPos, 5.0f*glm::vec3(1.0f,1.0f,1.0f), glm::vec3(1.0f,0.7f,1.8f), 0);
-            setUpDirLight(&shader, glm::vec3(1.0f,1.0f,1.0f), 1.3f*glm::vec3(1.0f,1.0f,1.0f));
+            setUpDirLight(&shader, glm::vec3(1.0f,1.0f,1.0f), 0.3f*glm::vec3(1.0f,1.0f,1.0f));
+
+            setUpSpotLight(&shader, cameraPos, 1.0f*glm::vec3(1.0f,1.0f,1.0f), cameraFront, 0);
+
+//            setTransform(&shader,glm::vec3( -2.0f,  0.0f,  0.0f),glm::vec3( 0.101f,  0.101f,  0.101f));
+//            newModelf.Draw(shader);
+                
+            shader.setBool("isNormalTextureMap", factor2==1);
+                
+            noramlShowShader.use();
+            setTransform(&noramlShowShader,glm::vec3( 2.0f,  0.5f,  0.0f),glm::vec3( 1.1f,  1.1f,  1.1f));
+            noramlShowShader.setFloat("time", glfwGetTime());
+            newModel.Draw(noramlShowShader);
+            }
             
-            setUpSpotLight(&shader, cameraPos, 4.0f*glm::vec3(1.0f,1.0f,1.0f), cameraFront, 0);
-            
-            setTransform(&shader,glm::vec3( -2.0f,  0.0f,  0.0f),glm::vec3( 0.101f,  0.101f,  0.101f));
-            newModelf.Draw(shader);
+            {
+                glDepthFunc(GL_LEQUAL); // set depth function back to default
+                shaderSky.use();
+                glm::mat4 view          = glm::mat4(1.0f);
+                glm::mat4 projection    = glm::mat4(1.0f);
+                
+                view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+                projection = glm::perspective(glm::radians(fov), (float)screenWidth / (float)screenHeight, 0.1f, 100.0f);
+                view = glm::mat4(glm::mat3(view)); // remove translation from the view matrix
+                shaderSky.setMat4("view", view);
+                shaderSky.setMat4("projection", projection);
+                
+                glBindVertexArray(skyVAO);
+                glActiveTexture(GL_TEXTURE0);
+                glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+                glDrawArrays(GL_TRIANGLES, 0, 36);
+                glBindVertexArray(0);
+                glDepthFunc(GL_LESS); // set depth function back to default
+            }
         }
         
         // 第二处理阶段
         glBindFramebuffer(GL_FRAMEBUFFER, 0); // 返回默认
-        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+        glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         
         shaderSingle.use();
+        shaderSingle.setFloat("bloomFactor", factor1);
         glBindVertexArray(quadVAO);
         glDisable(GL_DEPTH_TEST);
         glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
         glDrawArrays(GL_TRIANGLES, 0, 6);
-        
+                
+        glEnable(GL_DEPTH_TEST);
+
         glfwSwapBuffers(window);
         glfwPollEvents();
     }

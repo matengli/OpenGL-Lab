@@ -153,6 +153,12 @@
 		1C504F40258345B200008FAD /* diablo3_pose_spec.tga */ = {isa = PBXFileReference; lastKnownFileType = file; path = diablo3_pose_spec.tga; sourceTree = "<group>"; };
 		1C8465A4258767B500563539 /* window.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = window.vert; sourceTree = "<group>"; };
 		1C8465A5258767B500563539 /* window.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = window.frag; sourceTree = "<group>"; };
+		1C8F446C2588DDAB00381DB1 /* right.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = right.jpg; sourceTree = "<group>"; };
+		1C8F446D2588DDAB00381DB1 /* top.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = top.jpg; sourceTree = "<group>"; };
+		1C8F446E2588DDAB00381DB1 /* bottom.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = bottom.jpg; sourceTree = "<group>"; };
+		1C8F446F2588DDAB00381DB1 /* front.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = front.jpg; sourceTree = "<group>"; };
+		1C8F44702588DDAB00381DB1 /* back.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = back.jpg; sourceTree = "<group>"; };
+		1C8F44712588DDAC00381DB1 /* left.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = left.jpg; sourceTree = "<group>"; };
 		1CA21E45257E50390054250D /* qiyana.jpeg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = qiyana.jpeg; sourceTree = "<group>"; };
 		1CA21E46257F27030054250D /* light.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = light.frag; sourceTree = "<group>"; };
 		1CA21E47257F27030054250D /* light.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = light.vert; sourceTree = "<group>"; };
@@ -174,6 +180,9 @@
 		1CE88EA925383DB0005CC41B /* diablo3_pose_diffuse.tga */ = {isa = PBXFileReference; lastKnownFileType = file; path = diablo3_pose_diffuse.tga; sourceTree = "<group>"; };
 		1CE88EB3253851E1005CC41B /* sakura.obj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = sakura.obj; sourceTree = "<group>"; };
 		1CE88EB425385357005CC41B /* meinumo.obj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = meinumo.obj; sourceTree = "<group>"; };
+		1CF9A9BD258A04DA00705920 /* normalShow.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = normalShow.frag; sourceTree = "<group>"; };
+		1CF9A9BE258A04DA00705920 /* normalShow.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = normalShow.vert; sourceTree = "<group>"; };
+		1CF9A9BF258A04DA00705920 /* normalShow.gs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = normalShow.gs; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -380,6 +389,19 @@
 			path = diablo;
 			sourceTree = "<group>";
 		};
+		1C8F446B2588DD9800381DB1 /* skyBox */ = {
+			isa = PBXGroup;
+			children = (
+				1C8F44702588DDAB00381DB1 /* back.jpg */,
+				1C8F446E2588DDAB00381DB1 /* bottom.jpg */,
+				1C8F446F2588DDAB00381DB1 /* front.jpg */,
+				1C8F44712588DDAC00381DB1 /* left.jpg */,
+				1C8F446C2588DDAB00381DB1 /* right.jpg */,
+				1C8F446D2588DDAB00381DB1 /* top.jpg */,
+			);
+			path = skyBox;
+			sourceTree = "<group>";
+		};
 		1CE88E352534449E005CC41B /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -452,6 +474,7 @@
 		1CE88E5D2535D49E005CC41B /* Resource */ = {
 			isa = PBXGroup;
 			children = (
+				1C8F446B2588DD9800381DB1 /* skyBox */,
 				1C504F3C2583458100008FAD /* diablo */,
 				1C504F262582269400008FAD /* nanosuit */,
 				1CA21E45257E50390054250D /* qiyana.jpeg */,
@@ -473,12 +496,15 @@
 		1CE88EA025381EAF005CC41B /* shader */ = {
 			isa = PBXGroup;
 			children = (
+				1CF9A9BD258A04DA00705920 /* normalShow.frag */,
+				1CF9A9BF258A04DA00705920 /* normalShow.gs */,
+				1CF9A9BE258A04DA00705920 /* normalShow.vert */,
 				1C8465A5258767B500563539 /* window.frag */,
 				1C8465A4258767B500563539 /* window.vert */,
 				1CA21E46257F27030054250D /* light.frag */,
 				1CA21E47257F27030054250D /* light.vert */,
-				1CE88EA125381EAF005CC41B /* test.frag */,
 				1CE88EA225381EAF005CC41B /* test.vert */,
+				1CE88EA125381EAF005CC41B /* test.frag */,
 			);
 			path = shader;
 			sourceTree = "<group>";
