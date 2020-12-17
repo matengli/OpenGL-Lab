@@ -160,14 +160,14 @@ void main()
     vec3 viewDir = normalize(viewPos - FragPos);
 //
     vec3 result = vec3(0.0f);
-    result += CalcDirLight(dirLight, norm, viewDir);
-//    // phase 2: point lights
-    for(int i = 0; i < NR_POINT_LIGHTS; i++)
-        result += CalcPointLight(pointLights[i], norm, FragPos, viewDir);
-    // phase 3: spot light
-    for(int i = 0; i < NR_SPOT_LIGHTS; i++){
-        result += CalcSpotLight(spotLights[i], norm, FragPos, viewDir);
-    }
+//    result += CalcDirLight(dirLight, norm, viewDir);
+////    // phase 2: point lights
+//    for(int i = 0; i < NR_POINT_LIGHTS; i++)
+//        result += CalcPointLight(pointLights[i], norm, FragPos, viewDir);
+//    // phase 3: spot light
+//    for(int i = 0; i < NR_SPOT_LIGHTS; i++){
+//        result += CalcSpotLight(spotLights[i], norm, FragPos, viewDir);
+//    }
 
 //    FragColor = vec4(vec3(gl_FragCoord.z), 1.0);
 //    float depth = LinearizeDepth(gl_FragCoord.z) / far; // 为了演示除以 far

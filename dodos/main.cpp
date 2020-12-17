@@ -529,8 +529,13 @@ int main(int argc, const char * argv[]) {
 
             setUpSpotLight(&shader, cameraPos, 1.0f*glm::vec3(1.0f,1.0f,1.0f), cameraFront, 0);
 
-//            setTransform(&shader,glm::vec3( -2.0f,  0.0f,  0.0f),glm::vec3( 0.101f,  0.101f,  0.101f));
-//            newModelf.Draw(shader);
+            setTransform(&shader,glm::vec3( -2.0f,  0.0f,  0.0f),glm::vec3( 0.101f,  0.101f,  0.101f));
+            newModelf.Draw(shader);
+                
+            noramlShowShader.use();
+            setTransform(&noramlShowShader,glm::vec3( -2.0f,  0.0f,  0.0f),glm::vec3( 0.101f,  0.101f,  0.101f));
+            noramlShowShader.setFloat("time", glfwGetTime());
+            newModelf.Draw(noramlShowShader);
                 
             shader.setBool("isNormalTextureMap", factor2==1);
                 
