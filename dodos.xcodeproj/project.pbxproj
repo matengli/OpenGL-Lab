@@ -151,6 +151,9 @@
 		1C504F3E258345B100008FAD /* diablo3_pose_nm.tga */ = {isa = PBXFileReference; lastKnownFileType = file; path = diablo3_pose_nm.tga; sourceTree = "<group>"; };
 		1C504F3F258345B200008FAD /* diablo3_pose_nm_tangent.tga */ = {isa = PBXFileReference; lastKnownFileType = file; path = diablo3_pose_nm_tangent.tga; sourceTree = "<group>"; };
 		1C504F40258345B200008FAD /* diablo3_pose_spec.tga */ = {isa = PBXFileReference; lastKnownFileType = file; path = diablo3_pose_spec.tga; sourceTree = "<group>"; };
+		1C68930925958AEA0099D7F5 /* floor.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = floor.jpg; sourceTree = "<group>"; };
+		1C68930B25958C330099D7F5 /* planeShader.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = planeShader.vert; sourceTree = "<group>"; };
+		1C68930C25958C340099D7F5 /* planeShader.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = planeShader.frag; sourceTree = "<group>"; };
 		1C8465A4258767B500563539 /* window.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = window.vert; sourceTree = "<group>"; };
 		1C8465A5258767B500563539 /* window.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = window.frag; sourceTree = "<group>"; };
 		1C8F446C2588DDAB00381DB1 /* right.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = right.jpg; sourceTree = "<group>"; };
@@ -480,6 +483,7 @@
 				1CA21E45257E50390054250D /* qiyana.jpeg */,
 				1CE88EB425385357005CC41B /* meinumo.obj */,
 				1CE88EB3253851E1005CC41B /* sakura.obj */,
+				1C68930925958AEA0099D7F5 /* floor.jpg */,
 				1CE88EA825382A87005CC41B /* grid.tga */,
 			);
 			path = Resource;
@@ -499,6 +503,8 @@
 				1CF9A9BD258A04DA00705920 /* normalShow.frag */,
 				1CF9A9BF258A04DA00705920 /* normalShow.gs */,
 				1CF9A9BE258A04DA00705920 /* normalShow.vert */,
+				1C68930B25958C330099D7F5 /* planeShader.vert */,
+				1C68930C25958C340099D7F5 /* planeShader.frag */,
 				1C8465A5258767B500563539 /* window.frag */,
 				1C8465A4258767B500563539 /* window.vert */,
 				1CA21E46257F27030054250D /* light.frag */,
