@@ -291,9 +291,34 @@ unsigned int getQuadVAO(){
     return quadVAO;
 }
 
-//unsigned int getCubeVAO(){
-//
-//}
+unsigned int getPlaneVAO(){
+    float quadVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
+        // positions   // texCoords
+        1.0f,0.0f, -1.0f,  0.0f,1.0f,0.0f, 1.0f, 0.0f,
+        -1.0f,0.0f, -1.0f,  0.0f,1.0f,0.0f, 0.0f, 0.0f,
+        -1.0f,0.0f,  1.0f,  0.0f,1.0f,0.0f, 0.0f, 1.0f,
+
+        1.0f,0.0f,  1.0f,  0.0f,1.0f,0.0f, 1.0f, 1.0f,
+        1.0f,0.0f, -1.0f,  0.0f,1.0f,0.0f, 1.0f, 0.0f,
+        -1.0f,0.0f,  1.0f,  0.0f,1.0f,0.0f, 0.0f, 1.0f
+    };
+    
+    // screen quad VAO
+    unsigned int quadVAO, quadVBO;
+    glGenVertexArrays(1, &quadVAO);
+    glGenBuffers(1, &quadVBO);
+    glBindVertexArray(quadVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+    
+    return quadVAO;
+}
 
 unsigned int getSkyBoxVAO(){
     float skyboxVertices[] = {
@@ -487,6 +512,8 @@ int main(int argc, const char * argv[]) {
     unsigned int quadVAO = getQuadVAO();
     factor1 = 0.2f;
     
+    unsigned int planeVAO = getPlaneVAO();
+    
     vector<std::string> faces
     {
         "Resource/skyBox/right.jpg",
@@ -501,11 +528,14 @@ int main(int argc, const char * argv[]) {
     
     Label label;
     label.init("Resource/arial.ttf", 64);
+    
+    Mesh mesh;
+    auto tex = mesh.getImage("Resource/floor.jpg");
 
     while(!glfwWindowShouldClose(window))
     {
         glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-        glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
         glEnable(GL_DEPTH_TEST);
         
@@ -515,39 +545,51 @@ int main(int argc, const char * argv[]) {
             glfwSetCursorPosCallback(window, mouse_callback);
 
             {
-            shader.use();
-            shader.setVec3("viewDir", cameraPos);
-            shader.setFloat("Material.shininess", 16.0f);
-            shader.use();
+                shader.use();
+                shader.setVec3("viewDir", cameraPos);
+                shader.setFloat("Material.shininess", 16.0f);
+                shader.use();
 
-            glPolygonMode(GL_FRONT, GL_FILL);
+                glPolygonMode(GL_FRONT, GL_FILL);
+                
+                shader.use();
+                setTransform(&shader,glm::vec3( -2.0f,  0.0f,  0.0f),glm::vec3( 11.0f,1.0f,11.0f));
+                glBindVertexArray(planeVAO);
+                glBindTexture(GL_TEXTURE_2D, tex);
+                glActiveTexture(GL_TEXTURE0);
+                shader.setInt("texture_diffuse", 0);
+                glDrawArrays(GL_TRIANGLES, 0, 6);
+                glBindVertexArray(0);
+                
+                setTransform(&shader,glm::vec3( -2.0f,  1.0f,  0.0f),glm::vec3( 1.1f,  1.1f,  1.1f));
+                newModel.Draw(shader);
 
-//            setTransform(&shader,glm::vec3( 0.0f,  0.5f,  0.0f),glm::vec3( 1.1f,  1.1f,  1.1f));
-//            newModel.Draw(shader);
+        //            setTransform(&shader,glm::vec3( 0.0f,  0.5f,  0.0f),glm::vec3( 1.1f,  1.1f,  1.1f));
+        //            newModel.Draw(shader);
+        //
+//                setTransform(&shader,glm::vec3( 2.0f,  0.5f,  0.0f),glm::vec3( 1.1f,  1.1f,  1.1f));
+//                newModel.Draw(shader);
+
+
+        //        setUpPointLight(&shader, cameraPos, 5.0f*glm::vec3(1.0f,1.0f,1.0f), glm::vec3(1.0f,0.7f,1.8f), 0);
+                setUpDirLight(&shader, glm::vec3(1.0f,1.0f,1.0f), 0.3f*glm::vec3(1.0f,1.0f,1.0f));
+
+                setUpSpotLight(&shader, cameraPos, 1.0f*glm::vec3(1.0f,1.0f,1.0f), cameraFront, 0);
+
+                setTransform(&shader,glm::vec3( -2.0f,  0.0f,  0.0f),glm::vec3( 0.101f,  0.101f,  0.101f));
+//                newModelf.Draw(shader);
 //
-            setTransform(&shader,glm::vec3( 2.0f,  0.5f,  0.0f),glm::vec3( 1.1f,  1.1f,  1.1f));
-            newModel.Draw(shader);
+//                noramlShowShader.use();
+//                setTransform(&noramlShowShader,glm::vec3( -2.0f,  0.0f,  0.0f),glm::vec3( 0.101f,  0.101f,  0.101f));
+//                noramlShowShader.setFloat("time", glfwGetTime());
+//                newModelf.Draw(noramlShowShader);
 
+                shader.setBool("isNormalTextureMap", factor2==1);
 
-    //        setUpPointLight(&shader, cameraPos, 5.0f*glm::vec3(1.0f,1.0f,1.0f), glm::vec3(1.0f,0.7f,1.8f), 0);
-            setUpDirLight(&shader, glm::vec3(1.0f,1.0f,1.0f), 0.3f*glm::vec3(1.0f,1.0f,1.0f));
-
-            setUpSpotLight(&shader, cameraPos, 1.0f*glm::vec3(1.0f,1.0f,1.0f), cameraFront, 0);
-
-            setTransform(&shader,glm::vec3( -2.0f,  0.0f,  0.0f),glm::vec3( 0.101f,  0.101f,  0.101f));
-            newModelf.Draw(shader);
-
-            noramlShowShader.use();
-            setTransform(&noramlShowShader,glm::vec3( -2.0f,  0.0f,  0.0f),glm::vec3( 0.101f,  0.101f,  0.101f));
-            noramlShowShader.setFloat("time", glfwGetTime());
-            newModelf.Draw(noramlShowShader);
-
-            shader.setBool("isNormalTextureMap", factor2==1);
-
-            noramlShowShader.use();
-            setTransform(&noramlShowShader,glm::vec3( 2.0f,  0.5f,  0.0f),glm::vec3( 1.1f,  1.1f,  1.1f));
-            noramlShowShader.setFloat("time", glfwGetTime());
-            newModel.Draw(noramlShowShader);
+                noramlShowShader.use();
+                setTransform(&noramlShowShader,glm::vec3( 2.0f,  0.5f,  0.0f),glm::vec3( 1.1f,  1.1f,  1.1f));
+                noramlShowShader.setFloat("time", glfwGetTime());
+                newModel.Draw(noramlShowShader);
                 
                 glEnable(GL_BLEND);
                 glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

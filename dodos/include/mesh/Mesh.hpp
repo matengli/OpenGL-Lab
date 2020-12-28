@@ -51,11 +51,12 @@ public:
     vector<Vertex> vertices;
     vector<unsigned int> indices;
     vector<Texture> textures;
+    Mesh(){
+        
+    }
     Mesh(vector<Vertex> vertices, vector<unsigned int> indices, vector<Texture> textures);
     void Draw(Shader& shader);
     void setTexture(string path,string typeName);
-    
-private:
     /*  渲染数据  */
     unsigned int VAO, VBO, EBO;
     /*  函数  */
