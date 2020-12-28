@@ -23,6 +23,8 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
+#include "Label.hpp"
+
 const int screenWidth = 800;
 const int screenHeight = 600;
 
@@ -496,6 +498,9 @@ int main(int argc, const char * argv[]) {
     };
    
     unsigned int cubemapTexture = loadCubemap(faces);
+    
+    Label label;
+    label.init("Resource/arial.ttf", 64);
 
     while(!glfwWindowShouldClose(window))
     {
@@ -504,11 +509,11 @@ int main(int argc, const char * argv[]) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
         glEnable(GL_DEPTH_TEST);
         
-//        drawScene
+////        drawScene
         {
             processInput(window);
             glfwSetCursorPosCallback(window, mouse_callback);
-        
+
             {
             shader.use();
             shader.setVec3("viewDir", cameraPos);
@@ -516,13 +521,13 @@ int main(int argc, const char * argv[]) {
             shader.use();
 
             glPolygonMode(GL_FRONT, GL_FILL);
-            
+
 //            setTransform(&shader,glm::vec3( 0.0f,  0.5f,  0.0f),glm::vec3( 1.1f,  1.1f,  1.1f));
 //            newModel.Draw(shader);
 //
             setTransform(&shader,glm::vec3( 2.0f,  0.5f,  0.0f),glm::vec3( 1.1f,  1.1f,  1.1f));
             newModel.Draw(shader);
-                
+
 
     //        setUpPointLight(&shader, cameraPos, 5.0f*glm::vec3(1.0f,1.0f,1.0f), glm::vec3(1.0f,0.7f,1.8f), 0);
             setUpDirLight(&shader, glm::vec3(1.0f,1.0f,1.0f), 0.3f*glm::vec3(1.0f,1.0f,1.0f));
@@ -531,32 +536,37 @@ int main(int argc, const char * argv[]) {
 
             setTransform(&shader,glm::vec3( -2.0f,  0.0f,  0.0f),glm::vec3( 0.101f,  0.101f,  0.101f));
             newModelf.Draw(shader);
-                
+
             noramlShowShader.use();
             setTransform(&noramlShowShader,glm::vec3( -2.0f,  0.0f,  0.0f),glm::vec3( 0.101f,  0.101f,  0.101f));
             noramlShowShader.setFloat("time", glfwGetTime());
             newModelf.Draw(noramlShowShader);
-                
+
             shader.setBool("isNormalTextureMap", factor2==1);
-                
+
             noramlShowShader.use();
             setTransform(&noramlShowShader,glm::vec3( 2.0f,  0.5f,  0.0f),glm::vec3( 1.1f,  1.1f,  1.1f));
             noramlShowShader.setFloat("time", glfwGetTime());
             newModel.Draw(noramlShowShader);
+                
+                glEnable(GL_BLEND);
+                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+                label.RenderText("asdfasdf", 30, 30, 1, glm::vec3(1.0f,0.0f,0.0f));
+                glDisable(GL_BLEND);
             }
-            
+
             {
                 glDepthFunc(GL_LEQUAL); // set depth function back to default
                 shaderSky.use();
                 glm::mat4 view          = glm::mat4(1.0f);
                 glm::mat4 projection    = glm::mat4(1.0f);
-                
+
                 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
                 projection = glm::perspective(glm::radians(fov), (float)screenWidth / (float)screenHeight, 0.1f, 100.0f);
                 view = glm::mat4(glm::mat3(view)); // remove translation from the view matrix
                 shaderSky.setMat4("view", view);
                 shaderSky.setMat4("projection", projection);
-                
+
                 glBindVertexArray(skyVAO);
                 glActiveTexture(GL_TEXTURE0);
                 glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
@@ -565,21 +575,19 @@ int main(int argc, const char * argv[]) {
                 glDepthFunc(GL_LESS); // set depth function back to default
             }
         }
-        
+
         // 第二处理阶段
         glBindFramebuffer(GL_FRAMEBUFFER, 0); // 返回默认
-        glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-        
+
         shaderSingle.use();
         shaderSingle.setFloat("bloomFactor", factor1);
         glBindVertexArray(quadVAO);
         glDisable(GL_DEPTH_TEST);
         glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
         glDrawArrays(GL_TRIANGLES, 0, 6);
-                
-        glEnable(GL_DEPTH_TEST);
-
+        
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
