@@ -152,7 +152,7 @@ void main()
 {
     vec3 norm = vec3(0.1f);
     if(isNormalTextureMap){
-        norm = normalize(texture(texture_normal1, TexCoords).xyz*2.0f-1.0f);
+        norm = normalize(texture(texture_normal1, TexCoords).rgb*2.0f-1.0f);
     }else{
         norm = normalize(Normal);
     }

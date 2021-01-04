@@ -110,38 +110,6 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
     cameraFront = glm::normalize(front);
 }
 
-unsigned int* getImage(std::string imgName){
-    unsigned int texture1;
-    glGenTextures(1, &texture1);
-    glBindTexture(GL_TEXTURE_2D, texture1);
-
-    // S轴wrap模式
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-    // T轴wrap模式
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-    // 设置纹理过滤
-    // 一个常见的错误是，将放大过滤的选项设置为多级渐远纹理过滤选项之一。
-    // 这样没有任何效果，因为多级渐远纹理主要是使用在纹理被缩小的情况下的：
-    // 纹理放大不会使用多级渐远纹理，为放大过滤设置多级渐远纹理的选项会产生一个GL_INVALID_ENUM错误代码。
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    
-    int width, height, nrChannels;
-    stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
-//    "Resource/diablo3_pose_diffuse.tga"
-    unsigned short *data = stbi_load_16(imgName.c_str(), &width, &height, &nrChannels, 0);
-    if(data){
-        // 纹理目标，mipmap级别，存储格式，宽度，高度，0（历史问题）,图像数据
-        glad_glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,width,height,0,GL_RGB,GL_UNSIGNED_SHORT,data);
-        // 自动创建mipmaps
-        glad_glGenerateMipmap(GL_TEXTURE_2D);
-    }
-    // 释放对应内存
-    stbi_image_free(data);
-    
-    return &texture1;
-}
-
 void setTransform(Shader* shader,glm::vec3 position,glm::vec3 scale){
     float time = glfwGetTime();
 //        int loc = glad_glGetUniformLocation(shaderProgram,"ourColorFactor");
@@ -408,6 +376,72 @@ unsigned int loadCubemap(vector<std::string> faces)
     return textureID;
 }
 
+unsigned int genFrameBuffer(){
+    //    创建帧缓冲
+    unsigned int framebuffer;
+    glGenFramebuffers(1, &framebuffer);
+    //    绑定当前的framebuffer
+    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+    //    创建渲染对象
+    unsigned int rbo;
+    glGenRenderbuffers(1, &rbo);
+    glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+    //    创建模版，深度缓冲
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 800, 600);
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    
+    //    将渲染对象绑定到framebuffer上
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
+    
+    //    检查完整性
+    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
+    //    解绑
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    
+    return framebuffer;
+}
+
+unsigned int bindFrameBufferWithTexture(unsigned int framebuffer){
+    //    创建texture
+    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+    unsigned int textureColorbuffer;
+    glGenTextures(1, &textureColorbuffer);
+    glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 800, 600, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    //    将texture绑定到texture上
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorbuffer, 0);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    
+    return textureColorbuffer;
+}
+
+unsigned int bindFrameBufferWithTextureSingleChanal(unsigned int framebuffer){
+    const GLuint SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
+
+    GLuint depthMap;
+    glGenTextures(1, &depthMap);
+    glBindTexture(GL_TEXTURE_2D, depthMap);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
+                 SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
+    //    不包含颜色缓冲，只是包含深度信息,必须这样设置来让帧缓冲有效
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    
+    return depthMap;
+}
+
 int main(int argc, const char * argv[]) {
     
     // 初始化，
@@ -476,41 +510,18 @@ int main(int argc, const char * argv[]) {
     };
     
 //    创建帧缓冲
-    unsigned int framebuffer;
-    glGenFramebuffers(1, &framebuffer);
-    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-    
-//    创建texture
-    unsigned int textureColorbuffer;
-    glGenTextures(1, &textureColorbuffer);
-    glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 800, 600, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glBindTexture(GL_TEXTURE_2D, 0);
-    
-//    将texture绑定到texture上
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorbuffer, 0);
-    
-//    创建渲染对象
-    unsigned int rbo;
-    glGenRenderbuffers(1, &rbo);
-    glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-//    创建模版，深度缓冲
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 800, 600);
-    glBindRenderbuffer(GL_RENDERBUFFER, 0);
-    
-//    将渲染对象绑定到framebuffer上
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
-    
-//    检查完整性
-    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-        std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
-//    解绑
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
+    unsigned int framebuffer = genFrameBuffer();
+//    glGenFramebuffers(1, &framebuffer);
+//    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+//
+////    创建texture
+    unsigned int textureColorbuffer = bindFrameBufferWithTexture(framebuffer);
     unsigned int quadVAO = getQuadVAO();
     factor1 = 0.2f;
+    
+    
+    unsigned int shadowFrameBuffer = genFrameBuffer();
+    unsigned int shadowTexture = bindFrameBufferWithTextureSingleChanal(shadowFrameBuffer);
     
     unsigned int planeVAO = getPlaneVAO();
     
@@ -531,6 +542,27 @@ int main(int argc, const char * argv[]) {
     
     Mesh mesh;
     auto tex = mesh.getImage("Resource/floor.jpg");
+    
+    GLuint depthMapFBO;
+    glGenFramebuffers(1, &depthMapFBO);
+    
+    const GLuint SHADOW_WIDTH = 800, SHADOW_HEIGHT = 600;
+
+    GLuint depthMap;
+    glGenTextures(1, &depthMap);
+    glBindTexture(GL_TEXTURE_2D, depthMap);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    
+    glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
 
     while(!glfwWindowShouldClose(window))
     {
@@ -571,10 +603,10 @@ int main(int argc, const char * argv[]) {
 //                newModel.Draw(shader);
 
 
-        //        setUpPointLight(&shader, cameraPos, 5.0f*glm::vec3(1.0f,1.0f,1.0f), glm::vec3(1.0f,0.7f,1.8f), 0);
-                setUpDirLight(&shader, glm::vec3(1.0f,1.0f,1.0f), 0.3f*glm::vec3(1.0f,1.0f,1.0f));
+                setUpPointLight(&shader, cameraPos, 5.0f*glm::vec3(1.0f,1.0f,1.0f), glm::vec3(1.0f,0.7f,1.8f), 0);
+//                setUpDirLight(&shader, glm::vec3(0.0f,-1.0f,0.0f), 1.5f*glm::vec3(1.0f,1.0f,1.0f));
 
-                setUpSpotLight(&shader, cameraPos, 1.0f*glm::vec3(1.0f,1.0f,1.0f), cameraFront, 0);
+//                setUpSpotLight(&shader, cameraPos, 1.0f*glm::vec3(1.0f,1.0f,1.0f), cameraFront, 0);
 
                 setTransform(&shader,glm::vec3( -2.0f,  0.0f,  0.0f),glm::vec3( 0.101f,  0.101f,  0.101f));
 //                newModelf.Draw(shader);
